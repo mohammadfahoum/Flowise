@@ -1,10 +1,18 @@
-import { ICommonObject, INode, INodeData as INodeDataFromComponent, INodeParams } from 'flowise-components'
+import { IAction } from 'flowise-components'
+import { ICommonObject, IFileUpload, INode, INodeData as INodeDataFromComponent, INodeParams } from 'flowise-components'
 
 export type MessageType = 'apiMessage' | 'userMessage'
+
+export type ChatflowType = 'CHATFLOW' | 'MULTIAGENT'
 
 export enum chatType {
     INTERNAL = 'INTERNAL',
     EXTERNAL = 'EXTERNAL'
+}
+
+export enum ChatMessageRatingType {
+    THUMBS_UP = 'THUMBS_UP',
+    THUMBS_DOWN = 'THUMBS_DOWN'
 }
 /**
  * Databases
@@ -20,7 +28,9 @@ export interface IChatFlow {
     apikeyid?: string
     analytic?: string
     chatbotConfig?: string
-    apiConfig?: any
+    apiConfig?: string
+    category?: string
+    type?: ChatflowType
 }
 
 export interface IChatMessage {
@@ -30,10 +40,25 @@ export interface IChatMessage {
     chatflowid: string
     sourceDocuments?: string
     usedTools?: string
+    fileAnnotations?: string
+    agentReasoning?: string
+    fileUploads?: string
     chatType: string
     chatId: string
     memoryType?: string
     sessionId?: string
+    createdDate: Date
+    leadEmail?: string
+    action?: string | null
+}
+
+export interface IChatMessageFeedback {
+    id: string
+    content?: string
+    chatflowid: string
+    chatId: string
+    messageId: string
+    rating: ChatMessageRatingType
     createdDate: Date
 }
 
@@ -65,6 +90,33 @@ export interface ICredential {
     encryptedData: string
     updatedDate: Date
     createdDate: Date
+}
+
+export interface IVariable {
+    id: string
+    name: string
+    value: string
+    type: string
+    updatedDate: Date
+    createdDate: Date
+}
+
+export interface ILead {
+    id: string
+    name?: string
+    email?: string
+    phone?: string
+    chatflowid: string
+    chatId: string
+    createdDate: Date
+}
+
+export interface IUpsertHistory {
+    id: string
+    chatflowid: string
+    result: string
+    flowData: string
+    date: Date
 }
 
 export interface IComponentNodes {
@@ -157,22 +209,29 @@ export interface IDepthQueue {
 export interface IMessage {
     message: string
     type: MessageType
+    role?: MessageType
+    content?: string
 }
 
 export interface IncomingInput {
     question: string
-    history: IMessage[]
     overrideConfig?: ICommonObject
     socketIOClientId?: string
     chatId?: string
+    stopNodeId?: string
+    uploads?: IFileUpload[]
+    leadEmail?: string
+    history?: IMessage[]
+    action?: IAction
 }
 
 export interface IActiveChatflows {
     [key: string]: {
         startingNodes: IReactFlowNode[]
-        endingNodeData: INodeData
+        endingNodeData?: INodeData
         inSync: boolean
         overrideConfig?: ICommonObject
+        chatId?: string
     }
 }
 
@@ -188,12 +247,6 @@ export interface IOverrideConfig {
     type: string
 }
 
-export interface IDatabaseExport {
-    chatmessages: IChatMessage[]
-    chatflows: IChatFlow[]
-    apikeys: ICommonObject[]
-}
-
 export type ICredentialDataDecrypted = ICommonObject
 
 // Plain credential object sent to server
@@ -207,3 +260,19 @@ export interface ICredentialReqBody {
 export interface ICredentialReturnResponse extends ICredential {
     plainDataObj: ICredentialDataDecrypted
 }
+
+export interface IUploadFileSizeAndTypes {
+    fileTypes: string[]
+    maxUploadSize: number
+}
+
+export interface IApiKey {
+    id: string
+    keyName: string
+    apiKey: string
+    apiSecret: string
+    updatedDate: Date
+}
+
+// DocumentStore related
+export * from './Interface.DocumentStore'
